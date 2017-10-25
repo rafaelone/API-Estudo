@@ -4,7 +4,7 @@ var mongodb = require('mongodb');
 
 var bodyParser = require('body-parser');
 
-var objectID = require('mongodb').objectID;
+var objectID = require('mongodb').ObjectID;
 
 var app = express();
 
@@ -66,7 +66,7 @@ app.get('/api/:id', (req, res) => {
     var dados = req.body;
         db.open(function(err, mongoclient){
             mongoclient.collection("postagens", function (err, collection){
-                collection.find(req.params.id).toArray(function(err, results){
+                collection.find(objectID(req.params.id)).toArray(function(err, results){
                     if(err){
                         res.json(err);
                     }else{
@@ -78,3 +78,43 @@ app.get('/api/:id', (req, res) => {
         });
 });
 
+//PUT (update)
+
+app.put('/api/:id', (req, res) => {
+    var dados = req.body;
+        db.open(function(err, mongoclient){
+            mongoclient.collection("postagens", function (err, collection){
+                collection.update(
+                    { _id: objectID(req.params.id) },
+                    { $set : {titulo: req.body.titulo }},
+                    {},
+                    function(err, records){
+                        if(err){
+                            res.json(err);
+                        }else{
+                            res.json(records);
+                        }
+                        mongoclient.close();
+                });
+            });
+        });
+});
+
+//delete
+app.delete('/api/:id', (req, res) => {
+    var dados = req.body;
+        db.open(function(err, mongoclient){
+            mongoclient.collection("postagens", function (err, collection){
+                collection.remove(
+                    { _id: objectID(req.params.id) },
+                    function(err, records){
+                        if(err){
+                            res.json(err);
+                        }else{
+                            res.json({status: 'DELETADO COM SUCESSO'});
+                        }
+                        mongoclient.close();
+                });
+            });
+        });
+});
